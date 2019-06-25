@@ -6,16 +6,20 @@ const User = require('../models/user')
 router.get('/check', async (req, res) => {
     if (req.cookies.user_sid && req.session.user) {
         let user = await User.findOne({ login: req.session.user.login })
-        res.json(user)
-    } else { res.send('false') }
+        if (user) {
+            res.json({ isAuth: true })
+        } res.json({ isAuth: false })
+    } else { res.json({ isAuth: false }) }
 })
 
 //Выход пользователя из сессии
 router.get('/logout', async (req, res) => {
     if (req.cookies.user_sid && req.session.user) {
         req.session.destroy()
+        res.send({ status: 'Logged out' })
+    } else {
+        res.send({ status: 'Not logged in' })
     }
-    res.status(200).send({ status: 'Logged out' })
 })
 
 //Регистрация пользователя
@@ -27,8 +31,12 @@ router.post('/signup', async (req, res, next) => {
         })
         await user.save()
         req.session.user = user;
-        res.json(user)
-    } catch (error) { res.status(400).send({ message: 'Login ar Password is already in use' }) }
+        console.log(user)
+        res.json({ status: `Sign up success! Welcome ${user.login}` })
+    } catch (error) {
+        console.log('error')
+        res.json({ status: 'Login or Password is already in use' })
+    }
 });
 
 //Вход пользователя
@@ -38,9 +46,9 @@ router.post('/login', async (req, res, next) => {
         if (await user.comparePassword(req.body.password[0])) {
             req.session.user = user;
             delete user._doc.password;
-            res.json(user);
-        } else res.status(400).send({ message: 'Неверный пароль' })
-    } else res.status(400).send({ message: 'Пользователь не найден' })
+            res.json({ isAuth: true, status: `Successfully logge id ${user.login}` });
+        } else res.json({ status: 'Wrong password or login' })
+    } else res.json({ status: 'Wrong password or login' })
 })
 
 module.exports = router;

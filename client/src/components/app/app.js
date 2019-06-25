@@ -1,11 +1,13 @@
 import React, { Component } from 'react';
 import Form from '../form/form';
-import { Container, Button } from 'reactstrap';
+import { Container } from 'reactstrap';
 import { Route } from 'react-router-dom';
 import { connect } from "react-redux";
 import Header from '../header'
 import ProtectedPage from '../portected-page'
 import { loginAC, logoutAC } from '../../redux/actions/actions'
+import AuthHOC from '../authHOC'
+import AuthService from '../../services/authService'
 
 const mapStateToProps = (state) => ({
   isAuth: state.user.isAuth
@@ -13,27 +15,60 @@ const mapStateToProps = (state) => ({
 
 class App extends Component {
 
-  state = {
-    registration: '/users/signup',
-    login: '/users/login'
-  }
-
   render() {
-    const { logIn, logOut } = this.props;
+    const { logIn, logOut, signUp, check } = new AuthService();
+    const { logInRedux, logOutRedux } = this.props;
+
+    const loginCombined = async (login, password) => {
+      return logIn(login, password)
+        .then(({ isAuth, status }) => {
+          if (isAuth) {
+            logInRedux()
+            document.getElementById('info').innerText = `${status}`;
+          } else {
+            document.getElementById('info').innerText = `${status}`;
+          }
+        })
+        .catch(() => {
+          document.getElementById('info').innerText = 'Server Error';
+        })
+    }
+
+    const signupCombined = async (login, password) => {
+      return signUp(login, password)
+        .then(({ status }) => {
+          if (status) {
+            logInRedux()
+            document.getElementById('info').innerText = `${status}`;
+          } else {
+            document.getElementById('info').innerText = `Smth goes wrong, try another login or password`;
+          }
+        })
+        .catch(() => {
+          document.getElementById('info').innerText = 'Server Error';
+        })
+    }
+
+    const logoutCombined = () => {
+      logOut()
+        .then(({ status }) => {
+          logOutRedux();
+          document.getElementById('info').innerText = `${status}`;
+        })
+        .catch(() => { document.getElementById('info').innerText = 'Server Error'; })
+    }
+
     return (
       <div className='app'>
         <Container className='container'>
-          <Header />
+          <Header logOut={logoutCombined} loggedIn={!!this.props.isAuth} />
           <Route path='/registration' render={() => {
-            return <Form url={this.state.registration} formType={'Registration Form'} logIn={logIn} isAuth={this.props.isAuth}/>
+            return <Form formType={'Registration Form'} authFunc={signupCombined} check={check} />
           }} />
           <Route path='/login' render={() => {
-            return <Form url={this.state.login} formType={'Login Form'} logIn={logIn} isAuth={this.props.isAuth}/>
+            return <Form formType={'Login Form'} authFunc={loginCombined} check={check} />
           }} />
-          <Route path='/protected' render={() => {
-            return <ProtectedPage isAuth={this.props.isAuth} logOut={logOut} />
-          }} />
-          <div id='info'></div>
+          <Route path='/protected' component={AuthHOC(ProtectedPage, check)} />
         </Container>
       </div>
     )
@@ -42,8 +77,8 @@ class App extends Component {
 
 const mapDispatchToProps = dispatch => {
   return {
-    logIn: () => { dispatch(loginAC()) },
-    logOut: () => { dispatch(logoutAC()) },
+    logInRedux: () => { dispatch(loginAC()) },
+    logOutRedux: () => { dispatch(logoutAC()) },
   }
 }
 
