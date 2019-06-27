@@ -9,7 +9,7 @@ export default class UserForm extends Component {
         password: '',
         error: false
     }
-
+   
     componentDidCatch() {
         this.setState({ error: true })
     }
@@ -28,7 +28,7 @@ export default class UserForm extends Component {
 
     submitHandler = async (e) => {
         e.preventDefault()
-        this.props.authFunc(this.state.login, this.state.password)            
+        this.props.authFunc(this.state.login, this.state.password)
     }
 
     render() {
@@ -52,7 +52,7 @@ export default class UserForm extends Component {
                     <Button color="primary" onClick={this.submitHandler}>Submit</Button>
                 </Form>
 
-                <Button color="primary" onClick={this.amILoggedIn}>Auth TEST</Button>
+                <Button color="primary" onClick={this.amILoggedIn}>Auth TEST</Button>                
             </>
         );
     }

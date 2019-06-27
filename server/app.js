@@ -5,6 +5,10 @@ const cookieParser = require('cookie-parser');
 const logger = require('morgan');
 const mongoose = require('mongoose');
 
+const graphMiddleware = require('express-graphql');
+const schema = require('./GraphQl/schema')
+const resolvers = require('./GraphQl/resolvers')
+
 //Сессии
 const session = require('express-session');
 const MongoStore = require('connect-mongo')(session);
@@ -42,6 +46,12 @@ app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 
 app.use(cookiesCleaner);
+
+app.use('/graph', graphMiddleware({
+  schema,
+  rootValue: resolvers,
+  graphiql: true,
+}))
 
 app.use('/', indexRouter);
 app.use('/users', userRouter);

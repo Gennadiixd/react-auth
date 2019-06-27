@@ -1,13 +1,13 @@
 import React, { Component } from 'react';
 import Form from '../form/form';
 import { Container } from 'reactstrap';
-import { Route } from 'react-router-dom';
+import { Route, Switch } from 'react-router-dom';
 import { connect } from "react-redux";
 import Header from '../header'
 import ProtectedPage from '../portected-page'
-import { loginAC, logoutAC } from '../../redux/actions/actions'
+import * as actions from '../../redux/actions/actions'
 import AuthHOC from '../authHOC'
-import AuthService from '../../services/authService'
+import AuthService from '../../services/graphAuthService'
 
 const mapStateToProps = (state) => ({
   isAuth: state.user.isAuth
@@ -17,16 +17,17 @@ class App extends Component {
 
   render() {
     const { logIn, logOut, signUp, check } = new AuthService();
-    const { logInRedux, logOutRedux } = this.props;
+    const { loginAC, logoutAC } = this.props;
 
     const loginCombined = async (login, password) => {
       return logIn(login, password)
-        .then(({ isAuth, status }) => {
-          if (isAuth) {
-            logInRedux()
-            document.getElementById('info').innerText = `${status}`;
+        .then(({ data }) => {
+          const login = data.login.login
+          if (login !== "Error") {
+            loginAC()
+            document.getElementById('info').innerText = `Welcome ${login}`;
           } else {
-            document.getElementById('info').innerText = `${status}`;
+            document.getElementById('info').innerText = `${login}! incorrect login or password`;
           }
         })
         .catch(() => {
@@ -36,15 +37,17 @@ class App extends Component {
 
     const signupCombined = async (login, password) => {
       return signUp(login, password)
-        .then(({ status }) => {
-          if (status) {
-            logInRedux()
-            document.getElementById('info').innerText = `${status}`;
+        .then(({ data }) => {
+          const login = data.signup.login
+          if (login !== "Error") {
+            loginAC()
+            document.getElementById('info').innerText = `Welcome ${login}`;
           } else {
             document.getElementById('info').innerText = `Smth goes wrong, try another login or password`;
           }
         })
-        .catch(() => {
+        .catch((err) => {
+          console.log(err)
           document.getElementById('info').innerText = 'Server Error';
         })
     }
@@ -52,7 +55,7 @@ class App extends Component {
     const logoutCombined = () => {
       logOut()
         .then(({ status }) => {
-          logOutRedux();
+          logoutAC();
           document.getElementById('info').innerText = `${status}`;
         })
         .catch(() => { document.getElementById('info').innerText = 'Server Error'; })
@@ -62,28 +65,23 @@ class App extends Component {
       <div className='app'>
         <Container className='container'>
           <Header logOut={logoutCombined} loggedIn={!!this.props.isAuth} />
-          <Route path='/registration' render={() => {
-            return <Form formType={'Registration Form'} authFunc={signupCombined} check={check} />
-          }} />
-          <Route path='/login' render={() => {
-            return <Form formType={'Login Form'} authFunc={loginCombined} check={check} />
-          }} />
-          <Route path='/protected' component={AuthHOC(ProtectedPage, check)} />
+          <Switch>
+            <Route path='/registration' render={() => {
+              return <Form formType={'Registration Form'} authFunc={signupCombined} check={check} />
+            }} />
+            <Route path='/login' render={() => {
+              return <Form formType={'Login Form'} authFunc={loginCombined} check={check} />
+            }} />
+            <Route path='/protected' component={AuthHOC(ProtectedPage, check)} />
+          </Switch>
         </Container>
       </div>
     )
   }
 }
 
-const mapDispatchToProps = dispatch => {
-  return {
-    logInRedux: () => { dispatch(loginAC()) },
-    logOutRedux: () => { dispatch(logoutAC()) },
-  }
-}
-
 export default connect(
   mapStateToProps,
-  mapDispatchToProps,
+  actions,
 )(App);
 
