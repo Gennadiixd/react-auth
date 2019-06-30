@@ -28,12 +28,11 @@ export default class header extends Component {
 
     render() {
         const links = this.renderLinks(this.state.links)
-
         return (
             <>
                 <div id='info'>Pls signup or login</div>
                 <div className='header'>
-                    <NavLink to='/' onClick={this.props.logOut}>Log out</NavLink>
+                    <NavLink to='/login/' onClick={this.props.logOut}>Log out</NavLink>
                     {links}
                 </div>
             </>

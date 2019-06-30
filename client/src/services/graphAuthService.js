@@ -37,16 +37,44 @@ export default class graphAuthService {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ query })
-        };        
+        };
         const res = await fetch(url, opts)
         return await res.json()
     }
 
-    logOut = () => {
-        console.log('under construction')
+    logOut = async () => {
+        const query = `
+            query{
+                    logout{
+                login
+            }
+          }
+        `;
+        const url = "/graph";
+        const opts = {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ query })
+        };
+        const res = await fetch(url, opts)
+        return await res.json()
     }
 
-    check = () => {
-        console.log('under construction')
+    check = async () => {
+        const query = `
+            query{
+                    check{
+                login
+            }
+          }
+        `;
+        const url = "/graph";
+        const opts = {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ query })
+        };
+        const res = await fetch(url, opts)
+        return await res.json()
     }
 }

@@ -8,7 +8,9 @@ module.exports = buildSchema(`
 
     type Query {
         getUser(login: String) : User      
-        login(login: String, password: String) : User        
+        login(login: String, password: String) : User   
+        logout : User    
+        check : User   
     }
 
     input UserInput {

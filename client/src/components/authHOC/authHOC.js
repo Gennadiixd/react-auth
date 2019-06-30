@@ -1,9 +1,11 @@
-import React from 'react'
-import Spinner from '../spinner'
-import { Redirect } from 'react-router-dom'
+import React from 'react';
+import Spinner from '../spinner';
+import { Redirect } from 'react-router-dom';
 import ErrorMessage from '../errrorMessage/errorMessage';
+import AuthService from '../../services/graphAuthService';
 
-export default function AuthHOC(View, checkAuth) {
+function AuthHOC(View) {
+    const { check } = new AuthService();
 
     return class extends React.Component {
 
@@ -18,10 +20,11 @@ export default function AuthHOC(View, checkAuth) {
         }
 
         componentDidMount() {
-            checkAuth()
-                .then(({ isAuth }) => {
+            check()
+                .then(({ data }) => {
+                    const { login } = data.check
                     this.setState({
-                        isAuth,
+                        isAuth: !!login,
                         loading: false
                     })
                 })
@@ -52,3 +55,5 @@ export default function AuthHOC(View, checkAuth) {
 
     }
 }
+
+export default AuthHOC

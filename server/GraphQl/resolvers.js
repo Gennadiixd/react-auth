@@ -37,4 +37,21 @@ module.exports = {
         }
     },
 
+    logout: async (graph, req) => {
+        if (req.cookies.user_sid && req.session.user) {
+            req.session.destroy()
+            return { login: "Logged out" }
+        } else {
+            return { login: "Not logged in" }
+        }
+    },
+
+    check: async (graph, req) => {
+        if (req.cookies.user_sid && req.session.user) {
+            let user = await User.findOne({ login: req.session.user.login })
+            if (user) {
+                return ({ login: 'ok' })
+            } return ({ login: '' })
+        } else { return ({ login: '' }) }
+    }
 }

@@ -14,14 +14,6 @@ export default class UserForm extends Component {
         this.setState({ error: true })
     }
 
-    amILoggedIn = async (e) => {
-        e.preventDefault()
-        this.props.check()
-            .then(({ isAuth }) => {
-                alert(isAuth)
-            })
-    }
-
     inputHandler = async (e) => {
         await this.setState({ [e.target.name]: [e.target.value] })
     }
@@ -51,8 +43,6 @@ export default class UserForm extends Component {
                     </FormGroup>
                     <Button color="primary" onClick={this.submitHandler}>Submit</Button>
                 </Form>
-
-                <Button color="primary" onClick={this.amILoggedIn}>Auth TEST</Button>                
             </>
         );
     }
